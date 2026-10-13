@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b0c10" />
+    <title>PlotTwist — AI scenes inside your videos</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="PlotTwist home">
+        <span class="brand-mark">P</span>
+        <span>PlotTwist</span>
+        <span class="prototype-pill">PROTOTYPE</span>
+      </a>
+      <div class="top-actions">
+        <span class="autosave"><span></span> Saved locally</span>
+        <button class="button ghost small" id="newProjectButton">New project</button>
+        <button class="avatar" aria-label="Account">JD</button>
+      </div>
+    </header>
+
+    <main>
+      <nav class="steps" aria-label="Project progress">
+        <button class="step active" data-step="1"><span>1</span><b>Upload</b></button>
+        <i></i>
+        <button class="step" data-step="2"><span>2</span><b>Place scene</b></button>
+        <i></i>
+        <button class="step" data-step="3"><span>3</span><b>Generate</b></button>
+        <i></i>
+        <button class="step" data-step="4"><span>4</span><b>Export</b></button>
+      </nav>
+
+      <section class="workspace">
+        <div class="editor-column">
+          <div class="video-shell">
+            <div class="video-topline">
+              <div>
+                <span class="eyebrow">SOURCE VIDEO</span>
+                <strong id="fileName">No video selected</strong>
+              </div>
+              <div class="video-source-actions">
+                <div class="video-meta" id="videoMeta">—</div>
+                <button class="replace-video-button" id="replaceVideoButton" hidden>
+                  <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v6h-6"/></svg>
+                  Replace video
+                </button>
+              </div>
+            </div>
+
+            <div class="video-stage" id="videoStage">
+              <video id="sourceVideo" playsinline preload="metadata"></video>
+              <div class="empty-state" id="emptyState">
+                <div class="upload-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></svg>
+                </div>
+                <h1>Make the scene nobody expects.</h1>
+                <p>Drop in a movie or long video. Everything stays in your browser for this prototype.</p>
+                <button class="button primary" id="chooseVideoButton">Choose a video</button>
+                <span>MP4, WebM or MOV · up to 4K</span>
+              </div>
+              <div class="drop-overlay" id="dropOverlay">Drop video to open</div>
+              <div class="generated-preview" id="generatedPreview">
+                <video id="generatedVideo" playsinline loop></video>
+                <div class="generated-badge"><span></span> AI SCENE</div>
+                <button class="close-preview" id="closePreview" aria-label="Close AI scene preview">×</button>
+              </div>
+            </div>
+
+            <div class="player-controls" id="playerControls">
+              <button class="icon-button" id="backButton" title="Back 5 seconds">
+                <svg viewBox="0 0 24 24"><path d="M5 7v5h5M5.6 12a7 7 0 1 0 2.05-4.95L5 9.7"/></svg><small>5</small>
+              </button>
+              <button class="play-button" id="playButton" title="Play">
+                <svg class="play-icon" viewBox="0 0 24 24"><path d="m9 6 9 6-9 6Z"/></svg>
+                <svg class="pause-icon" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg>
+              </button>
+              <button class="icon-button" id="forwardButton" title="Forward 5 seconds">
+                <svg viewBox="0 0 24 24"><path d="M19 7v5h-5m4.4 0a7 7 0 1 1-2.05-4.95L19 9.7"/></svg><small>5</small>
+              </button>
+              <span class="timecode"><b id="currentTime">00:00:00.000</b><em>/</em><span id="totalTime">00:00:00.000</span></span>
+              <div class="control-spacer"></div>
+              <button class="icon-button" id="muteButton" title="Mute">
+                <svg viewBox="0 0 24 24"><path d="M11 6 7 9H4v6h3l4 3Zm4 3a4 4 0 0 1 0 6m2.5-8.5a8 8 0 0 1 0 11"/></svg>
+              </button>
+              <button class="icon-button" id="fullscreenButton" title="Fullscreen">
+                <svg viewBox="0 0 24 24"><path d="M8 4H4v4m12-4h4v4M8 20H4v-4m12 4h4v-4"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="timeline-card">
+            <div class="timeline-heading">
+              <div>
+                <span class="eyebrow">PRECISION TIMELINE</span>
+                <strong>Choose the exact frame</strong>
+              </div>
+              <div class="frame-tools">
+                <button id="previousFrame" title="Previous frame">− 1 frame</button>
+                <button id="nextFrame" title="Next frame">+ 1 frame</button>
+                <span>30 fps</span>
+              </div>
+            </div>
+            <div class="timeline disabled" id="timeline">
+              <div class="filmstrip" id="filmstrip">
+                <div class="filmstrip-placeholder"></div><div class="filmstrip-placeholder"></div><div class="filmstrip-placeholder"></div><div class="filmstrip-placeholder"></div><div class="filmstrip-placeholder"></div><div class="filmstrip-placeholder"></div><div class="filmstrip-placeholder"></div><div class="filmstrip-placeholder"></div>
+              </div>
+              <div class="timeline-ticks"><span>00:00</span><span>25%</span><span>50%</span><span>75%</span><span>END</span></div>
+              <div class="playhead" id="playhead"><i></i><span></span></div>
+              <div class="insert-marker" id="insertMarker"><span>AI scene</span><i></i></div>
+            </div>
+            <div class="timeline-footer">
+              <p id="timelineHint">Upload a video to start placing your scene.</p>
+              <button class="button accent" id="markButton" disabled>
+                <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                Insert AI scene here
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="scene-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="eyebrow">YOUR PLOT TWIST</span>
+              <h2>Direct the next scene</h2>
+            </div>
+            <span class="panel-step">02</span>
+          </div>
+
+          <div class="reference-card locked" id="referenceCard">
+            <div class="reference-image" id="referenceImage">
+              <div class="reference-empty">
+                <svg viewBox="0 0 24 24"><path d="M4 18V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Zm0-3 4-4 3 3 2-2 7 7M15 9h.01"/></svg>
+                <span>Your chosen frame<br/>will appear here</span>
+              </div>
+            </div>
+            <div class="reference-copy">
+              <span>REFERENCE FRAME</span>
+              <strong id="referenceTime">Not placed yet</strong>
+            </div>
+            <span class="match-pill">MATCH LOOK</span>
+          </div>
+
+          <label class="field-label" for="promptInput">What happens next?</label>
+          <div class="prompt-field">
+            <textarea id="promptInput" maxlength="320" placeholder="e.g. Thor suddenly drops the axe, pulls Thanos closer and kisses him passionately..." disabled></textarea>
+            <div class="prompt-meta">
+              <button id="surpriseButton" disabled>✦ Surprise me</button>
+              <span><b id="charCount">0</b>/320</span>
+            </div>
+          </div>
+          <div class="prompt-tip">Describe movement, emotion and camera angle. The reference frame keeps the same characters and visual style.</div>
+
+          <div class="option-row">
+            <div class="option-group">
+              <label for="durationSelect">Scene length</label>
+              <select id="durationSelect" disabled>
+                <option value="3">3 seconds</option>
+                <option value="5" selected>5 seconds</option>
+                <option value="8">8 seconds</option>
+                <option value="10">10 seconds</option>
+              </select>
+            </div>
+            <div class="option-group">
+              <label for="qualitySelect">Quality</label>
+              <select id="qualitySelect" disabled>
+                <option value="standard" selected>Standard · 720p</option>
+                <option value="cinema">Cinema · 1080p</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="price-card" id="priceCard">
+            <div>
+              <span>ONE GENERATION</span>
+              <strong id="price">$1.59</strong>
+            </div>
+            <div class="pass-details">
+              <span><i>✓</i> Pay only for attempts you create</span>
+              <span><i>✓</i> Keep every generated version</span>
+              <span><i>✓</i> Export included</span>
+            </div>
+          </div>
+
+          <div class="wallet-row">
+            <span>Wallet balance <strong id="walletBalance">$0.00</strong></span>
+            <button id="addFundsButton" disabled>+ Add funds</button>
+          </div>
+
+          <button class="button generate" id="generateButton" disabled>
+            <span class="button-label">Add funds & generate · <b id="buttonPrice">$1.59</b></span>
+            <span class="button-loading"><i></i> Creating your plot twist…</span>
+          </button>
+          <p class="secure-note"><span>⌾</span> We verify and deduct one attempt before generation starts. Demo payments only.</p>
+
+          <div class="result-actions" id="resultActions">
+            <div class="attempts"><span>Viewing attempt <b id="attemptNumber">1</b></span><span class="paid-pill">SAVED</span></div>
+            <div class="result-buttons">
+              <button class="button ghost" id="regenerateButton">Generate another</button>
+              <button class="button primary" id="useSceneButton">Use this attempt</button>
+            </div>
+          </div>
+
+          <div class="attempt-library" id="attemptLibrary">
+            <div class="attempt-library-heading">
+              <div><span class="eyebrow">YOUR VERSIONS</span><strong>Attempt library</strong></div>
+              <span id="attemptCount">0 attempts</span>
+            </div>
+            <div class="attempt-list" id="attemptList"></div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <input id="fileInput" type="file" accept="video/mp4,video/webm,video/quicktime,video/*" hidden />
+    <div class="toast" id="toast" role="status"></div>
+
+    <div class="modal-backdrop" id="paymentModal" aria-hidden="true">
+      <section class="modal payment-modal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
+        <button class="modal-close" data-close="paymentModal" aria-label="Close">×</button>
+        <div class="modal-icon">↗</div>
+        <span class="eyebrow">PLOT TWIST WALLET</span>
+        <h2 id="paymentTitle">Add only what you want to spend.</h2>
+        <p>Start with enough for one attempt, or add more for later. Every new attempt is blocked until the wallet can cover it.</p>
+        <div class="wallet-summary">
+          <span>Current balance</span><strong id="modalWalletBalance">$0.00</strong>
+        </div>
+        <label class="topup-label" for="fundAmount">Amount to add</label>
+        <div class="topup-input"><span>$</span><input id="fundAmount" type="number" min="1.59" step="0.01" value="1.59" inputmode="decimal"></div>
+        <div class="topup-options">
+          <button data-attempts="1" class="active">1 attempt</button>
+          <button data-attempts="3">3 attempts</button>
+          <button data-attempts="5">5 attempts</button>
+        </div>
+        <div class="order-summary compact">
+          <div><span id="orderDescription">Minimum · one 5s Standard attempt</span><strong id="orderSubtotal">$1.59</strong></div>
+          <div class="order-total"><span>Wallet after payment</span><strong id="orderTotal">$1.59</strong></div>
+        </div>
+        <div class="fake-card"><span>•••• •••• •••• 4242</span><span>12/30&nbsp;&nbsp; 123</span></div>
+        <button class="button generate" id="payButton">Add <b id="payPrice">$1.59</b> & generate</button>
+        <p class="modal-footnote">Demo checkout · no card details or money are used</p>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="exportModal" aria-hidden="true">
+      <section class="modal export-modal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+        <button class="modal-close" data-close="exportModal" aria-label="Close">×</button>
+        <div class="export-art"><span>ORIGINAL</span><i>+</i><span>AI SCENE</span></div>
+        <h2 id="exportTitle">Your plot twist is ready.</h2>
+        <p id="exportCopy">This browser prototype renders a short proof-cut: two seconds before your marker, the generated scene, then two seconds after.</p>
+        <div class="export-progress" id="exportProgress"><i></i></div>
+        <div class="export-actions" id="exportActions">
+          <button class="button primary" id="downloadProofButton">Download proof-cut</button>
+          <button class="button ghost" id="downloadProjectButton">Download edit plan</button>
+        </div>
+        <p class="modal-footnote">This prototype makes a silent proof-cut. Production smart rendering preserves the complete movie and audio without replaying the full runtime.</p>
+      </section>
+    </div>
+
+    <template id="finishBarTemplate">
+      <div class="finish-bar" id="finishBar">
+        <div><span class="finish-check">✓</span><p><strong>Scene added</strong><small>Your AI scene is placed on the timeline.</small></p></div>
+        <button class="button accent" id="finishButton">Finish & export</button>
+      </div>
+    </template>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
